@@ -7,11 +7,11 @@ services:
     container_name: postgres_auth
     restart: always
     environment:
-      POSTGRES_DB: authdb
+      POSTGRES_DB: postgres
       POSTGRES_USER: reto
       POSTGRES_PASSWORD: reto
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
