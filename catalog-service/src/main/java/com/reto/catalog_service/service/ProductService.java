@@ -38,6 +38,10 @@ public class ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
+
+        System.out.println("Name recibido: " +request.getName());
+        System.out.println("Price recibido: " +request.getPrice());
+
         return toResponse(productRepository.save(product));
     }
 
