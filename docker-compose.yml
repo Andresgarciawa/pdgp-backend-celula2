@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+
+  # ── PostgreSQL – OrdersDB ────────────────────────────────────────────────────
+  ordersdb:
+    image: postgres:16-alpine
+    container_name: ordersdb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ordersdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ordersdb_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ordersdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── RabbitMQ ─────────────────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"    # AMQP (Spring se conecta acá)
+      - "15672:15672"  # Management UI → http://localhost:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  ordersdb_data:
+  rabbitmq_data:
