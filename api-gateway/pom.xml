@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +15,7 @@
     <artifactId>api-gateway</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>api-gateway</name>
-    <description>API Gateway for auth, catalog and orders services</description>
+    <description>API Gateway for reto services</description>
 
     <properties>
         <java.version>21</java.version>
@@ -36,7 +37,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-gateway</artifactId>
+            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -57,5 +58,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
