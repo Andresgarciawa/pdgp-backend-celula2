@@ -26,9 +26,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue queueCancelled() {
-        return new Queue(QUEUE_CANCELLED, false);
+        return new Queue(QUEUE_CANCELLED, true);
     }
 
+    @Bean
     public Binding bindingCreated() {
         return BindingBuilder.bind(queueCreated())
                 .to(ordersExchange())
