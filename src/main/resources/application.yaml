@@ -7,7 +7,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5441/authdb
+    url: jdbc:postgresql://localhost:5434/authdb
     username: celula2
     password: celula2
     driver-class-name: org.postgresql.Driver
