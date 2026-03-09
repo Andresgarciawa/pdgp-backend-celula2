@@ -26,7 +26,7 @@ public class CatalogClient {
      * Propagates the X-Correlation-Id header (HU5)
      */
     public StockCheckResponse checkStock(String productId, int quantity, String correlationId) {
-        String url = catalogServiceUrl + "/catalog/check-stock?productId=" + productId + "&quantity=" + quantity;
+        String url = catalogServiceUrl + "/products/check-stock?productId=" + productId + "&quantity=" + quantity;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Correlation-Id", correlationId);
