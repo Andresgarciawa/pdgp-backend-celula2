@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
   error:
     include-message: always
     include-binding-errors: always
@@ -7,7 +7,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5441/authdb
+    url: jdbc:postgresql://localhost:5432/authdb
     username: celula2
     password: celula2
     driver-class-name: org.postgresql.Driver
