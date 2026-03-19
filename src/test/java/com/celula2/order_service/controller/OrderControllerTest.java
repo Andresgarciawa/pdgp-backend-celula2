@@ -4,6 +4,7 @@ import com.celula2.order_service.dto.CreateOrderRequest;
 import com.celula2.order_service.dto.OrderResponse;
 import com.celula2.order_service.model.OrderStatus;
 import com.celula2.order_service.service.InsufficientStockException;
+import com.celula2.order_service.service.OrderNotFoundException;
 import com.celula2.order_service.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,40 @@ class OrderControllerTest {
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(orderService);
+    }
+
+    @Test
+    void cancelOrder_whenOrderExists_returns200() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        OrderResponse response = OrderResponse.builder()
+                .id(orderId)
+                .productId("prod-1")
+                .quantity(1)
+                .customerId("cust-1")
+                .status(OrderStatus.CANCELLED)
+                .createdAt(LocalDateTime.of(2026, 3, 7, 12, 0))
+                .correlationId("corr-777")
+                .build();
+
+        when(orderService.cancelOrder(eq(orderId), eq("corr-777")))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/orders/{id}/cancel", orderId)
+                        .header("X-Correlation-Id", "corr-777"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andExpect(jsonPath("$.correlationId").value("corr-777"));
+    }
+
+    @Test
+    void cancelOrder_whenOrderMissing_returns404() throws Exception {
+        UUID orderId = UUID.randomUUID();
+        when(orderService.cancelOrder(eq(orderId), eq("corr-123")))
+                .thenThrow(new OrderNotFoundException("Order not found: " + orderId));
+
+        mockMvc.perform(post("/orders/{id}/cancel", orderId)
+                        .header("X-Correlation-Id", "corr-123"))
+                .andExpect(status().isNotFound());
     }
 
     private String validPayload() {

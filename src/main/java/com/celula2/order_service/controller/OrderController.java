@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/orders")
@@ -38,5 +39,18 @@ public class OrderController {
                     .status(HttpStatus.CONFLICT)
                     .body(Map.of("error", ex.getMessage()));
         }
+    }
+
+    /**
+     * POST /orders/{id}/cancel
+     * HU8: Cancelar la orden, publishes order.cancelled, and triggers stock replenishment.
+     */
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder(
+            @PathVariable("id") UUID orderId,
+            @RequestHeader(value = "X-Correlation-Id", required = false) String correlationId) {
+
+        OrderResponse response = orderService.cancelOrder(orderId, correlationId);
+        return ResponseEntity.ok(response);
     }
 }

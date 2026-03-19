@@ -11,9 +11,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String ORDER_EXCHANGE   = "order.exchange";
+    public static final String ORDER_EXCHANGE   = "orders.exchange";
     public static final String ORDER_QUEUE      = "order.created.queue";
     public static final String ORDER_ROUTING_KEY = "order.created";
+    public static final String ORDER_CANCELLED_ROUTING_KEY = "order.cancelled";
 
     @Bean
     public TopicExchange orderExchange() {

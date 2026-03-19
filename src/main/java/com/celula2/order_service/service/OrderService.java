@@ -3,6 +3,7 @@ package com.celula2.order_service.service;
 import com.celula2.order_service.client.CatalogClient;
 import com.celula2.order_service.config.RabbitMQConfig;
 import com.celula2.order_service.dto.CreateOrderRequest;
+import com.celula2.order_service.dto.OrderCancelledEvent;
 import com.celula2.order_service.dto.OrderResponse;
 import com.celula2.order_service.dto.StockCheckResponse;
 import com.celula2.order_service.model.Order;
@@ -35,9 +36,7 @@ public class OrderService {
     public OrderResponse createOrder(CreateOrderRequest request, String correlationId) {
 
         // Generate correlationId if not provided
-        if (correlationId == null || correlationId.isBlank()) {
-            correlationId = UUID.randomUUID().toString();
-        }
+        correlationId = ensureCorrelationId(correlationId);
 
         log.info("[{}] Checking stock for product {} qty {}",
                 correlationId, request.getProductId(), request.getQuantity());
@@ -71,6 +70,55 @@ public class OrderService {
                 toResponse(saved));
 
         return toResponse(saved);
+    }
+
+    /**
+     * HU8: Cancels an order, publishes order.cancelled, and triggers stock replenishment.
+     *
+     * @param orderId       order id
+     * @param correlationId X-Correlation-Id header (optional)
+     * @return updated order as DTO
+     */
+    public OrderResponse cancelOrder(UUID orderId, String correlationId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found: " + orderId));
+
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = order.getCorrelationId();
+        }
+        correlationId = ensureCorrelationId(correlationId);
+
+        if (OrderStatus.CANCELLED.equals(order.getStatus())) {
+            return toResponse(order);
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCorrelationId(correlationId);
+
+        Order saved = orderRepository.save(order);
+        log.info("[{}] Order cancelled with id {}", correlationId, saved.getId());
+
+        OrderCancelledEvent event = OrderCancelledEvent.builder()
+                .eventId(UUID.randomUUID())
+                .orderId(saved.getId())
+                .productId(saved.getProductId())
+                .quantity(saved.getQuantity())
+                .correlationId(correlationId)
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.ORDER_EXCHANGE,
+                RabbitMQConfig.ORDER_CANCELLED_ROUTING_KEY,
+                event);
+
+        return toResponse(saved);
+    }
+
+    private String ensureCorrelationId(String correlationId) {
+        if (correlationId == null || correlationId.isBlank()) {
+            return UUID.randomUUID().toString();
+        }
+        return correlationId;
     }
 
     private OrderResponse toResponse(Order order) {
